@@ -27,7 +27,13 @@ function normalizar(input: LocatarioInput): LocatarioInput {
     cpf: onlyDigits(input.cpf),
     telefone: onlyDigits(input.telefone),
     email: input.email?.trim() || undefined,
-    endereco: input.endereco?.trim() || undefined,
+    cep: onlyDigits(input.cep ?? '') || undefined,
+    logradouro: input.logradouro?.trim() || undefined,
+    numero: input.numero?.trim() || undefined,
+    complemento: input.complemento?.trim() || undefined,
+    bairro: input.bairro?.trim() || undefined,
+    cidade: input.cidade?.trim() || undefined,
+    uf: input.uf?.trim().toUpperCase() || undefined,
     observacoes: input.observacoes?.trim() || undefined,
   };
 }

@@ -6,13 +6,26 @@ import { AppButton } from '../../../shared/components/AppButton';
 import { AppColors } from '../../../shared/constants/colors';
 import { formatCpf } from '../../../shared/utils/cpf';
 import { formatTelefone } from '../../../shared/utils/telefone';
+import { formatCep } from '../../../shared/utils/cep';
 import { useLocatarios } from '../context/LocatariosContext';
+import { Locatario } from '../types';
 
 type Props = { id: string };
 
 function formatarData(iso: string): string {
   const partes = iso.slice(0, 10).split('-');
   return partes.length === 3 ? `${partes[2]}/${partes[1]}/${partes[0]}` : iso;
+}
+
+/** Monta o endereço em texto legível a partir dos campos; undefined se vazio. */
+function formatarEndereco(loc: Locatario): string | undefined {
+  const ruaNumero = [loc.logradouro, loc.numero].filter(Boolean).join(', ');
+  const linha1 = [ruaNumero, loc.complemento].filter(Boolean).join(' - ');
+  const cidadeUf = [loc.cidade, loc.uf].filter(Boolean).join('/');
+  const linha2 = [loc.bairro, cidadeUf].filter(Boolean).join(' - ');
+  const linha3 = loc.cep ? `CEP ${formatCep(loc.cep)}` : '';
+  const partes = [linha1, linha2, linha3].filter((p) => p.length > 0);
+  return partes.length > 0 ? partes.join('\n') : undefined;
 }
 
 function Linha({ rotulo, valor }: { rotulo: string; valor?: string }) {
@@ -67,7 +80,7 @@ export function LocatarioDetailScreen({ id }: Props) {
         <Linha rotulo="CPF" valor={formatCpf(loc.cpf)} />
         <Linha rotulo="Telefone" valor={formatTelefone(loc.telefone)} />
         <Linha rotulo="E-mail" valor={loc.email} />
-        <Linha rotulo="Endereço" valor={loc.endereco} />
+        <Linha rotulo="Endereço" valor={formatarEndereco(loc)} />
         <Linha rotulo="Observações" valor={loc.observacoes} />
         <Linha rotulo="Cadastrado em" valor={formatarData(loc.criadoEm)} />
       </View>

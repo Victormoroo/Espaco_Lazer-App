@@ -52,7 +52,14 @@ export type Locatario = {
   cpf: string;           // armazenado só com dígitos (sem máscara)
   telefone: string;      // armazenado só com dígitos
   email?: string;
-  endereco?: string;
+  // Endereço estruturado (todos opcionais)
+  cep?: string;          // armazenado só com dígitos
+  logradouro?: string;
+  numero?: string;
+  complemento?: string;
+  bairro?: string;
+  cidade?: string;
+  uf?: string;           // 2 letras maiúsculas
   observacoes?: string;
   criadoEm: string;      // ISO 8601, gerado automaticamente
 };

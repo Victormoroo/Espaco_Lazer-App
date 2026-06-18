@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../../../shared/components/ScreenContainer';
 import { AppInput } from '../../../shared/components/AppInput';
@@ -7,6 +7,7 @@ import { AppButton } from '../../../shared/components/AppButton';
 import { AppColors } from '../../../shared/constants/colors';
 import { formatCpf } from '../../../shared/utils/cpf';
 import { formatTelefone } from '../../../shared/utils/telefone';
+import { formatCep } from '../../../shared/utils/cep';
 import { useLocatarios } from '../context/LocatariosContext';
 import { validarLocatario, ErrosLocatario } from '../validation/locatarioValidation';
 import { LocatarioInput } from '../types';
@@ -18,7 +19,13 @@ const VAZIO: LocatarioInput = {
   cpf: '',
   telefone: '',
   email: '',
-  endereco: '',
+  cep: '',
+  logradouro: '',
+  numero: '',
+  complemento: '',
+  bairro: '',
+  cidade: '',
+  uf: '',
   observacoes: '',
 };
 
@@ -34,7 +41,13 @@ export function LocatarioFormScreen({ id }: Props) {
           cpf: formatCpf(existente.cpf),
           telefone: formatTelefone(existente.telefone),
           email: existente.email ?? '',
-          endereco: existente.endereco ?? '',
+          cep: existente.cep ? formatCep(existente.cep) : '',
+          logradouro: existente.logradouro ?? '',
+          numero: existente.numero ?? '',
+          complemento: existente.complemento ?? '',
+          bairro: existente.bairro ?? '',
+          cidade: existente.cidade ?? '',
+          uf: existente.uf ?? '',
           observacoes: existente.observacoes ?? '',
         }
       : VAZIO,
@@ -99,13 +112,70 @@ export function LocatarioFormScreen({ id }: Props) {
       />
       {erros.email ? <Text style={styles.erro}>{erros.email}</Text> : null}
 
+      <Text style={styles.secao}>Endereço (opcional)</Text>
+
       <AppInput
-        label="Endereço (opcional)"
-        value={form.endereco}
-        onChangeText={(t) => set('endereco', t)}
-        placeholder="Rua, número, bairro, cidade"
-        multiline
+        label="CEP"
+        value={form.cep}
+        onChangeText={(t) => set('cep', formatCep(t))}
+        placeholder="00000-000"
+        keyboardType="number-pad"
+        maxLength={9}
       />
+
+      <AppInput
+        label="Logradouro"
+        value={form.logradouro}
+        onChangeText={(t) => set('logradouro', t)}
+        placeholder="Rua, avenida..."
+      />
+
+      <View style={styles.linha}>
+        <View style={styles.colNumero}>
+          <AppInput
+            label="Número"
+            value={form.numero}
+            onChangeText={(t) => set('numero', t)}
+            placeholder="123"
+          />
+        </View>
+        <View style={styles.colComplemento}>
+          <AppInput
+            label="Complemento"
+            value={form.complemento}
+            onChangeText={(t) => set('complemento', t)}
+            placeholder="Apto, bloco..."
+          />
+        </View>
+      </View>
+
+      <AppInput
+        label="Bairro"
+        value={form.bairro}
+        onChangeText={(t) => set('bairro', t)}
+        placeholder="Bairro"
+      />
+
+      <View style={styles.linha}>
+        <View style={styles.colCidade}>
+          <AppInput
+            label="Cidade"
+            value={form.cidade}
+            onChangeText={(t) => set('cidade', t)}
+            placeholder="Cidade"
+          />
+        </View>
+        <View style={styles.colUf}>
+          <AppInput
+            label="UF"
+            value={form.uf}
+            onChangeText={(t) => set('uf', t.toUpperCase())}
+            placeholder="UF"
+            autoCapitalize="characters"
+            maxLength={2}
+          />
+        </View>
+      </View>
 
       <AppInput
         label="Observações (opcional)"
@@ -126,5 +196,17 @@ export function LocatarioFormScreen({ id }: Props) {
 
 const styles = StyleSheet.create({
   erro: { color: AppColors.error, fontSize: 13, marginTop: -8, marginBottom: 12 },
+  secao: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: AppColors.darkBlue,
+    marginTop: 4,
+    marginBottom: 12,
+  },
+  linha: { flexDirection: 'row', gap: 12 },
+  colNumero: { flex: 1 },
+  colComplemento: { flex: 2 },
+  colCidade: { flex: 2 },
+  colUf: { flex: 1 },
   botao: { marginTop: 8, marginBottom: 24 },
 });
