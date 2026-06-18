@@ -6,7 +6,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Edge, SafeAreaView } from 'react-native-safe-area-context';
 import { AppColors } from '../constants/colors';
 
 type Props = {
@@ -17,6 +17,8 @@ type Props = {
   center?: boolean;
   style?: ViewStyle;
   backgroundColor?: string;
+  /** Bordas da área segura. Default: ['top','bottom']. Passe ['bottom'] sob header nativo. */
+  edges?: Edge[];
 };
 
 /**
@@ -29,9 +31,10 @@ export function ScreenContainer({
   center = false,
   style,
   backgroundColor = AppColors.lightGray,
+  edges = ['top', 'bottom'],
 }: Props) {
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor }]} edges={['top', 'bottom']}>
+    <SafeAreaView style={[styles.safe, { backgroundColor }]} edges={edges}>
       <KeyboardAvoidingView style={styles.flex} behavior="padding">
         {scroll ? (
           <ScrollView

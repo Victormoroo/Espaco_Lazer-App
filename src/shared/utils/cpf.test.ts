@@ -33,6 +33,7 @@ describe('isValidCpf', () => {
 
   it('rejeita sequências repetidas', () => {
     expect(isValidCpf('111.111.111-11')).toBe(false);
+    expect(isValidCpf('000.000.000-00')).toBe(false);
   });
 
   it('rejeita tamanho diferente de 11 dígitos', () => {

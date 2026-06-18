@@ -55,11 +55,12 @@ export function LocatarioFormScreen({ id }: Props) {
     } else {
       adicionar(form);
     }
-    router.back();
+    if (router.canGoBack()) router.back();
+    else router.replace('/locatarios');
   }
 
   return (
-    <ScreenContainer scroll>
+    <ScreenContainer scroll edges={['bottom']}>
       <AppInput
         label="Nome completo"
         value={form.nome}

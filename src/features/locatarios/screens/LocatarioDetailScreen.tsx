@@ -32,7 +32,7 @@ export function LocatarioDetailScreen({ id }: Props) {
 
   if (!locatario) {
     return (
-      <ScreenContainer center>
+      <ScreenContainer center edges={['bottom']}>
         <Text style={styles.naoEncontrado}>Locatário não encontrado.</Text>
       </ScreenContainer>
     );
@@ -51,7 +51,8 @@ export function LocatarioDetailScreen({ id }: Props) {
           style: 'destructive',
           onPress: () => {
             remover(loc.id);
-            router.back();
+            if (router.canGoBack()) router.back();
+            else router.replace('/locatarios');
           },
         },
       ],
@@ -59,7 +60,7 @@ export function LocatarioDetailScreen({ id }: Props) {
   }
 
   return (
-    <ScreenContainer scroll>
+    <ScreenContainer scroll edges={['bottom']}>
       <View style={styles.card}>
         <Text style={styles.nome}>{loc.nome}</Text>
         <View style={styles.divisor} />

@@ -17,4 +17,8 @@ describe('formatTelefone', () => {
   it('limita a 11 dígitos', () => {
     expect(formatTelefone('119876543219999')).toBe('(11) 98765-4321');
   });
+
+  it('é idempotente (valor já formatado não muda)', () => {
+    expect(formatTelefone('(11) 98765-4321')).toBe('(11) 98765-4321');
+  });
 });
