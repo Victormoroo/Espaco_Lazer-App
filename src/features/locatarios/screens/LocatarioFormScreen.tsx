@@ -7,7 +7,8 @@ import { AppButton } from '../../../shared/components/AppButton';
 import { AppColors } from '../../../shared/constants/colors';
 import { formatCpf } from '../../../shared/utils/cpf';
 import { formatTelefone } from '../../../shared/utils/telefone';
-import { formatCep } from '../../../shared/utils/cep';
+import { formatCep, onlyDigits } from '../../../shared/utils/cep';
+import { buscarEnderecoPorCep } from '../services/cepService';
 import { useLocatarios } from '../context/LocatariosContext';
 import { validarLocatario, ErrosLocatario } from '../validation/locatarioValidation';
 import { LocatarioInput } from '../types';
@@ -53,9 +54,38 @@ export function LocatarioFormScreen({ id }: Props) {
       : VAZIO,
   );
   const [erros, setErros] = useState<ErrosLocatario>({});
+  const [buscandoCep, setBuscandoCep] = useState(false);
+  const [cepNaoEncontrado, setCepNaoEncontrado] = useState(false);
 
   function set<K extends keyof LocatarioInput>(campo: K, valor: LocatarioInput[K]) {
     setForm((f) => ({ ...f, [campo]: valor }));
+  }
+
+  async function buscarCep(digitos: string) {
+    setBuscandoCep(true);
+    setCepNaoEncontrado(false);
+    const endereco = await buscarEnderecoPorCep(digitos);
+    setBuscandoCep(false);
+    if (!endereco) {
+      setCepNaoEncontrado(true);
+      return;
+    }
+    setForm((f) => ({
+      ...f,
+      logradouro: endereco.logradouro ?? f.logradouro,
+      bairro: endereco.bairro ?? f.bairro,
+      cidade: endereco.cidade ?? f.cidade,
+      uf: endereco.uf ?? f.uf,
+    }));
+  }
+
+  function onChangeCep(texto: string) {
+    const mascarado = formatCep(texto);
+    set('cep', mascarado);
+    setCepNaoEncontrado(false);
+    if (onlyDigits(mascarado).length === 8) {
+      void buscarCep(onlyDigits(mascarado));
+    }
   }
 
   function salvar() {
@@ -117,11 +147,16 @@ export function LocatarioFormScreen({ id }: Props) {
       <AppInput
         label="CEP"
         value={form.cep}
-        onChangeText={(t) => set('cep', formatCep(t))}
+        onChangeText={onChangeCep}
         placeholder="00000-000"
         keyboardType="number-pad"
         maxLength={9}
       />
+      {buscandoCep ? (
+        <Text style={styles.cepInfo}>Buscando endereço…</Text>
+      ) : cepNaoEncontrado ? (
+        <Text style={styles.cepErro}>CEP não encontrado — preencha manualmente.</Text>
+      ) : null}
 
       <AppInput
         label="Logradouro"
@@ -196,6 +231,8 @@ export function LocatarioFormScreen({ id }: Props) {
 
 const styles = StyleSheet.create({
   erro: { color: AppColors.error, fontSize: 13, marginTop: -8, marginBottom: 12 },
+  cepInfo: { color: AppColors.textMuted, fontSize: 12, marginTop: -8, marginBottom: 12 },
+  cepErro: { color: AppColors.error, fontSize: 12, marginTop: -8, marginBottom: 12 },
   secao: {
     fontSize: 13,
     fontWeight: '700',
