@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   KeyboardAvoidingView,
-  Platform,
   ScrollView,
   StyleSheet,
   View,
@@ -33,10 +32,7 @@ export function ScreenContainer({
 }: Props) {
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor }]} edges={['top', 'bottom']}>
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      <KeyboardAvoidingView style={styles.flex} behavior="padding">
         {scroll ? (
           <ScrollView
             contentContainerStyle={[styles.scrollContent, center && styles.center, style]}
