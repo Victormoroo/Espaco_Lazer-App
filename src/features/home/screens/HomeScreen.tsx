@@ -2,14 +2,10 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { MenuCard } from '../../../shared/components/MenuCard';
 import { AppColors } from '../../../shared/constants/colors';
 import { AppStrings } from '../../../shared/constants/strings';
 
-/**
- * Home provisória pós-login. Possui uma AppBar com o título e o botão "Sair".
- * As funcionalidades reais (reservas, calendário, locatários, pagamentos...)
- * serão adicionadas nas próximas etapas.
- */
 export function HomeScreen() {
   const router = useRouter();
 
@@ -33,14 +29,17 @@ export function HomeScreen() {
       </View>
 
       <View style={styles.body}>
-        <View style={styles.card}>
-          <Text style={styles.welcome}>Bem-vindo ao {AppStrings.appName}</Text>
-          <View style={styles.divider} />
-          <Text style={styles.secondary}>{AppStrings.appSubtitle}</Text>
-          <Text style={styles.hint}>
-            Esta é uma tela provisória. As funcionalidades de reservas, calendário,
-            locatários, check-in/out, contratos e pagamentos chegam nas próximas etapas.
-          </Text>
+        <Text style={styles.hello}>Bem-vindo ao {AppStrings.appName}</Text>
+        <Text style={styles.subtitle}>{AppStrings.appSubtitle}</Text>
+
+        <View style={styles.grid}>
+          <MenuCard
+            title="Locatários"
+            subtitle="Cadastro e contatos"
+            icon="people-outline"
+            onPress={() => router.push('/locatarios')}
+          />
+          <View style={styles.cardSpacer} />
         </View>
       </View>
     </SafeAreaView>
@@ -57,12 +56,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
-  appBarTitle: {
-    color: AppColors.white,
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: 0.3,
-  },
+  appBarTitle: { color: AppColors.white, fontSize: 18, fontWeight: '800', letterSpacing: 0.3 },
   logoutBtn: {
     borderWidth: 1,
     borderColor: AppColors.turquoise,
@@ -71,37 +65,9 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   logoutText: { color: AppColors.turquoise, fontWeight: '700', fontSize: 13 },
-  body: { flex: 1, padding: 24, justifyContent: 'center' },
-  card: {
-    backgroundColor: AppColors.white,
-    borderRadius: 20,
-    padding: 28,
-    alignItems: 'center',
-    shadowColor: AppColors.darkBlue,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
-  },
-  welcome: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: AppColors.darkBlue,
-    textAlign: 'center',
-  },
-  divider: {
-    height: 2,
-    width: 48,
-    borderRadius: 2,
-    backgroundColor: AppColors.gold,
-    marginVertical: 16,
-  },
-  secondary: { fontSize: 15, color: AppColors.turquoise, fontWeight: '600' },
-  hint: {
-    fontSize: 13,
-    color: AppColors.textMuted,
-    textAlign: 'center',
-    marginTop: 16,
-    lineHeight: 20,
-  },
+  body: { flex: 1, padding: 24 },
+  hello: { fontSize: 22, fontWeight: '800', color: AppColors.darkBlue },
+  subtitle: { fontSize: 14, color: AppColors.turquoise, fontWeight: '600', marginTop: 4, marginBottom: 24 },
+  grid: { flexDirection: 'row', gap: 16 },
+  cardSpacer: { flex: 1 },
 });
