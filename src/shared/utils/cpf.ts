@@ -21,3 +21,22 @@ export function formatCpf(value: string): string {
   }
   return digits;
 }
+
+/** Valida um CPF pelo dígito verificador (rejeita sequências repetidas). */
+export function isValidCpf(value: string): boolean {
+  const cpf = onlyDigits(value);
+  if (cpf.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(cpf)) return false;
+
+  const digits = cpf.split('').map((c) => parseInt(c, 10));
+  const calcular = (qtd: number): number => {
+    let soma = 0;
+    for (let i = 0; i < qtd; i++) {
+      soma += digits[i] * (qtd + 1 - i);
+    }
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+
+  return calcular(9) === digits[9] && calcular(10) === digits[10];
+}
