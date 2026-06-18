@@ -14,22 +14,19 @@ type Props = TextInputProps & {
   label: string;
 };
 
-/**
- * Campo de texto rotulado e estilizado. Quando `secureTextEntry` é passado,
- * exibe automaticamente um botão de olho para mostrar/ocultar a senha.
- */
-export function AppInput({ label, style, secureTextEntry, ...rest }: Props) {
+export function AppInput({ label, style, secureTextEntry, multiline, ...rest }: Props) {
   const isPassword = !!secureTextEntry;
   const [hidden, setHidden] = useState(true);
 
   return (
     <View style={styles.wrapper}>
       <Text style={styles.label}>{label}</Text>
-      <View style={styles.field}>
+      <View style={[styles.field, multiline ? styles.fieldMultiline : styles.fieldSingle]}>
         <TextInput
           placeholderTextColor={AppColors.textMuted}
-          style={[styles.input, style]}
+          style={[styles.input, multiline ? styles.inputMultiline : styles.inputSingle, style]}
           secureTextEntry={isPassword && hidden}
+          multiline={multiline}
           {...rest}
         />
         {isPassword ? (
@@ -62,23 +59,20 @@ const styles = StyleSheet.create({
   },
   field: {
     flexDirection: 'row',
-    alignItems: 'center',
-    height: 52,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: AppColors.border,
     backgroundColor: AppColors.white,
   },
+  fieldSingle: { height: 52, alignItems: 'center' },
+  fieldMultiline: { minHeight: 96, alignItems: 'stretch', paddingVertical: 4 },
   input: {
     flex: 1,
-    height: '100%',
     paddingHorizontal: 16,
     fontSize: 16,
     color: AppColors.darkBlue,
   },
-  eyeBtn: {
-    paddingHorizontal: 14,
-    height: '100%',
-    justifyContent: 'center',
-  },
+  inputSingle: { height: '100%' },
+  inputMultiline: { minHeight: 88, paddingTop: 12, textAlignVertical: 'top' },
+  eyeBtn: { paddingHorizontal: 14, justifyContent: 'center' },
 });
