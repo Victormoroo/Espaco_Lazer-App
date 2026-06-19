@@ -8,6 +8,7 @@ import { AppColors } from '../../../shared/constants/colors';
 import { formatCpf } from '../../../shared/utils/cpf';
 import { formatTelefone } from '../../../shared/utils/telefone';
 import { formatCep, onlyDigits } from '../../../shared/utils/cep';
+import { capitalizarPalavras } from '../../../shared/utils/texto';
 import { buscarEnderecoPorCep } from '../services/cepService';
 import { useLocatarios } from '../context/LocatariosContext';
 import { validarLocatario, ErrosLocatario } from '../validation/locatarioValidation';
@@ -56,9 +57,15 @@ export function LocatarioFormScreen({ id }: Props) {
   const [erros, setErros] = useState<ErrosLocatario>({});
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [cepNaoEncontrado, setCepNaoEncontrado] = useState(false);
+  const [numeroErro, setNumeroErro] = useState(false);
 
   function set<K extends keyof LocatarioInput>(campo: K, valor: LocatarioInput[K]) {
     setForm((f) => ({ ...f, [campo]: valor }));
+  }
+
+  function onChangeNumero(texto: string) {
+    setNumeroErro(/\D/.test(texto));
+    set('numero', onlyDigits(texto).slice(0, 5));
   }
 
   async function buscarCep(digitos: string) {
@@ -107,8 +114,10 @@ export function LocatarioFormScreen({ id }: Props) {
       <AppInput
         label="Nome completo"
         value={form.nome}
-        onChangeText={(t) => set('nome', t)}
+        onChangeText={(t) => set('nome', capitalizarPalavras(t))}
         placeholder="Nome do locatário"
+        autoCapitalize="words"
+        maxLength={60}
       />
       {erros.nome ? <Text style={styles.erro}>{erros.nome}</Text> : null}
 
@@ -163,6 +172,7 @@ export function LocatarioFormScreen({ id }: Props) {
         value={form.logradouro}
         onChangeText={(t) => set('logradouro', t)}
         placeholder="Rua, avenida..."
+        maxLength={100}
       />
 
       <View style={styles.linha}>
@@ -170,8 +180,10 @@ export function LocatarioFormScreen({ id }: Props) {
           <AppInput
             label="Número"
             value={form.numero}
-            onChangeText={(t) => set('numero', t)}
+            onChangeText={onChangeNumero}
             placeholder="123"
+            keyboardType="number-pad"
+            maxLength={5}
           />
         </View>
         <View style={styles.colComplemento}>
@@ -180,9 +192,13 @@ export function LocatarioFormScreen({ id }: Props) {
             value={form.complemento}
             onChangeText={(t) => set('complemento', t)}
             placeholder="Apto, bloco..."
+            maxLength={50}
           />
         </View>
       </View>
+      {numeroErro ? (
+        <Text style={styles.erro}>Número deve conter apenas dígitos.</Text>
+      ) : null}
 
       <AppInput
         label="Bairro"
@@ -198,6 +214,7 @@ export function LocatarioFormScreen({ id }: Props) {
             value={form.cidade}
             onChangeText={(t) => set('cidade', t)}
             placeholder="Cidade"
+            maxLength={50}
           />
         </View>
         <View style={styles.colUf}>
@@ -218,6 +235,7 @@ export function LocatarioFormScreen({ id }: Props) {
         onChangeText={(t) => set('observacoes', t)}
         placeholder="Anotações sobre o locatário"
         multiline
+        maxLength={200}
       />
 
       <AppButton
