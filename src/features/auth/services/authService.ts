@@ -1,38 +1,30 @@
-import { AuthConstants } from '../../../shared/constants/auth';
+import { supabase } from '../../../shared/lib/supabase';
 import { onlyDigits } from '../../../shared/utils/cpf';
 
-export type LoginResult =
-  | { success: true }
-  | { success: false; message: string };
+/** Domínio do e-mail sintético usado para autenticar por CPF. */
+const DOMINIO = 'espacolazer.app';
 
-/**
- * Validação LOCAL e TEMPORÁRIA do login (CPF + senha fixos).
- *
- * O CPF é comparado apenas pelos dígitos, então tanto faz o usuário digitar
- * com ou sem máscara.
- *
- * 🔜 Evolução: quando a autenticação real via Supabase for implementada,
- * troque o corpo desta função por algo como:
- *
- *   const { error } = await supabase.auth.signInWithPassword({ email, password });
- *   return error ? { success: false, message: error.message } : { success: true };
- *
- * Mantendo o mesmo retorno (`LoginResult`), a tela de login não precisa mudar.
- */
-export function validateLogin(cpf: string, password: string): LoginResult {
-  const cleanCpf = cpf.trim();
-  const cleanPassword = password.trim();
+/** Converte um CPF no e-mail sintético usado no Supabase Auth. */
+export function cpfParaEmail(cpf: string): string {
+  return `${onlyDigits(cpf)}@${DOMINIO}`;
+}
 
-  if (!cleanCpf || !cleanPassword) {
-    return { success: false, message: 'Informe o CPF e a senha.' };
+/** Faz login no Supabase Auth usando CPF + senha. Lança erro amigável. */
+export async function entrar(cpf: string, senha: string): Promise<void> {
+  const { error } = await supabase.auth.signInWithPassword({
+    email: cpfParaEmail(cpf),
+    password: senha,
+  });
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes('invalid')) {
+      throw new Error('CPF ou senha incorretos.');
+    }
+    throw new Error('Não foi possível entrar. Verifique sua conexão e tente novamente.');
   }
+}
 
-  const matchesCpf = onlyDigits(cleanCpf) === onlyDigits(AuthConstants.validCpf);
-  const matchesPassword = cleanPassword === AuthConstants.validPassword;
-
-  if (!matchesCpf || !matchesPassword) {
-    return { success: false, message: 'CPF ou senha incorretos.' };
-  }
-
-  return { success: true };
+/** Encerra a sessão atual. */
+export async function sair(): Promise<void> {
+  await supabase.auth.signOut();
 }
