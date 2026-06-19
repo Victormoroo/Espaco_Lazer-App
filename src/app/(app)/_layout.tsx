@@ -2,6 +2,7 @@ import React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { StatusBar } from 'expo-status-bar';
 import { ProfileMenuProvider } from '../../shared/components/ProfileMenu';
+import { DrawerConteudo } from '../../shared/components/DrawerConteudo';
 import { AppColors } from '../../shared/constants/colors';
 
 /**
@@ -14,6 +15,7 @@ export default function AppLayout() {
     <ProfileMenuProvider>
       <StatusBar style="light" />
       <Drawer
+        drawerContent={(props) => <DrawerConteudo {...props} />}
         screenOptions={{
           headerShown: false,
           drawerActiveTintColor: AppColors.turquoise,

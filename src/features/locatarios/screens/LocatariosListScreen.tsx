@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useLocatarios } from '../context/LocatariosContext';
 import { LocatarioListItem } from '../components/LocatarioListItem';
 import { AppColors } from '../../../shared/constants/colors';
@@ -17,6 +18,7 @@ import { onlyDigits } from '../../../shared/utils/cpf';
 export function LocatariosListScreen() {
   const router = useRouter();
   const { locatarios } = useLocatarios();
+  const insets = useSafeAreaInsets();
   const [busca, setBusca] = useState('');
 
   const filtrados = useMemo(() => {
@@ -54,7 +56,9 @@ export function LocatariosListScreen() {
           />
         )}
         contentContainerStyle={
-          filtrados.length === 0 ? styles.emptyContent : styles.listContent
+          filtrados.length === 0
+            ? styles.emptyContent
+            : [styles.listContent, { paddingBottom: insets.bottom + 88 }]
         }
         ListEmptyComponent={
           <View style={styles.empty}>
@@ -72,7 +76,7 @@ export function LocatariosListScreen() {
       />
 
       <TouchableOpacity
-        style={styles.fab}
+        style={[styles.fab, { bottom: insets.bottom + 20 }]}
         onPress={() => router.push('/locatarios/novo')}
         activeOpacity={0.85}
         accessibilityRole="button"
@@ -108,7 +112,6 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 28,
     width: 56,
     height: 56,
     borderRadius: 28,
