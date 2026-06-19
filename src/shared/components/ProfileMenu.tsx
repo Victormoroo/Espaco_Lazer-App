@@ -35,7 +35,7 @@ export function useProfileMenu(): ProfileMenuContextValue {
 export function ProfileMenuProvider({ children }: { children: React.ReactNode }) {
   const [ancora, setAncora] = useState<Ancora | null>(null);
   const router = useRouter();
-  const { sair: sairAuth } = useAuth();
+  const { sair: sairAuth, ehAdmin } = useAuth();
 
   function fechar() {
     setAncora(null);
@@ -45,6 +45,11 @@ export function ProfileMenuProvider({ children }: { children: React.ReactNode })
     setAncora(null);
     await sairAuth();
     router.replace('/login');
+  }
+
+  function irCriarUsuario() {
+    setAncora(null);
+    router.push('/usuarios/novo');
   }
 
   return (
@@ -64,6 +69,17 @@ export function ProfileMenuProvider({ children }: { children: React.ReactNode })
               <View style={[styles.card, { top: ancora.y + 13 }]}>
                 <Text style={styles.titulo}>CONTA</Text>
                 <View style={styles.divisor} />
+                {ehAdmin ? (
+                  <TouchableOpacity
+                    style={styles.item}
+                    onPress={irCriarUsuario}
+                    accessibilityRole="button"
+                    accessibilityLabel="Criar usuário"
+                  >
+                    <Ionicons name="person-add-outline" size={20} color={AppColors.darkBlue} />
+                    <Text style={styles.itemTexto}>Criar usuário</Text>
+                  </TouchableOpacity>
+                ) : null}
                 <TouchableOpacity
                   style={styles.item}
                   onPress={sair}

@@ -36,6 +36,8 @@ export default function AppLayout() {
             name="locatarios"
             options={{ drawerLabel: 'Locatários', title: 'Locatários' }}
           />
+          {/* Acessada via menu de perfil (admin); não aparece no drawer. */}
+          <Drawer.Screen name="usuarios" options={{ drawerItemStyle: { display: 'none' } }} />
         </Drawer>
       </ProfileMenuProvider>
     </LocatariosProvider>
