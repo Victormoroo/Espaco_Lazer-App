@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { LocatarioDetailScreen } from '../../../features/locatarios/screens/LocatarioDetailScreen';
+import { LocatarioDetailScreen } from '../../../../features/locatarios/screens/LocatarioDetailScreen';
 
 export default function DetalhesLocatario() {
   const { id } = useLocalSearchParams<{ id: string }>();

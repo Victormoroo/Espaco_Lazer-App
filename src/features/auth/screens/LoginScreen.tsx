@@ -32,7 +32,7 @@ export function LoginScreen() {
 
     setLoading(false);
     // `replace` evita que o botão "voltar" retorne ao login depois de logar.
-    router.replace('/home');
+    router.replace('/inicio');
   }
 
   return (
