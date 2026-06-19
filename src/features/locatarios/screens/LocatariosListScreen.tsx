@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   StyleSheet,
   Text,
@@ -17,7 +18,7 @@ import { onlyDigits } from '../../../shared/utils/cpf';
 
 export function LocatariosListScreen() {
   const router = useRouter();
-  const { locatarios } = useLocatarios();
+  const { locatarios, carregando, erro, recarregar } = useLocatarios();
   const insets = useSafeAreaInsets();
   const [busca, setBusca] = useState('');
 
@@ -31,6 +32,30 @@ export function LocatariosListScreen() {
         (digitos.length > 0 && l.cpf.includes(digitos)),
     );
   }, [busca, locatarios]);
+
+  if (carregando && locatarios.length === 0) {
+    return (
+      <View style={styles.centro}>
+        <ActivityIndicator size="large" color={AppColors.turquoise} />
+      </View>
+    );
+  }
+
+  if (erro && locatarios.length === 0) {
+    return (
+      <View style={styles.centro}>
+        <Ionicons name="cloud-offline-outline" size={48} color={AppColors.border} />
+        <Text style={styles.emptyText}>{erro}</Text>
+        <TouchableOpacity
+          style={styles.retryBtn}
+          onPress={() => void recarregar()}
+          accessibilityRole="button"
+        >
+          <Text style={styles.retryTexto}>Tentar novamente</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -90,6 +115,22 @@ export function LocatariosListScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: AppColors.lightGray },
+  centro: {
+    flex: 1,
+    backgroundColor: AppColors.lightGray,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  retryBtn: {
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: AppColors.turquoise,
+    borderRadius: 10,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+  },
+  retryTexto: { color: AppColors.turquoise, fontWeight: '700' },
   searchBox: {
     flexDirection: 'row',
     alignItems: 'center',

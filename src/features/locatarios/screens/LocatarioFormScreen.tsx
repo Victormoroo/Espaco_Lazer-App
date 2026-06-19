@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, StyleSheet, Text, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ScreenContainer } from '../../../shared/components/ScreenContainer';
 import { AppInput } from '../../../shared/components/AppInput';
@@ -58,6 +58,7 @@ export function LocatarioFormScreen({ id }: Props) {
   const [buscandoCep, setBuscandoCep] = useState(false);
   const [cepNaoEncontrado, setCepNaoEncontrado] = useState(false);
   const [numeroErro, setNumeroErro] = useState(false);
+  const [salvando, setSalvando] = useState(false);
 
   function set<K extends keyof LocatarioInput>(campo: K, valor: LocatarioInput[K]) {
     setForm((f) => ({ ...f, [campo]: valor }));
@@ -95,18 +96,24 @@ export function LocatarioFormScreen({ id }: Props) {
     }
   }
 
-  function salvar() {
+  async function salvar() {
     const validacao = validarLocatario(form, locatarios, id);
     setErros(validacao);
     if (Object.keys(validacao).length > 0) return;
 
-    if (id) {
-      atualizar(id, form);
-    } else {
-      adicionar(form);
+    setSalvando(true);
+    try {
+      if (id) {
+        await atualizar(id, form);
+      } else {
+        await adicionar(form);
+      }
+      if (router.canGoBack()) router.back();
+      else router.replace('/locatarios');
+    } catch (e) {
+      setSalvando(false);
+      Alert.alert('Erro ao salvar', e instanceof Error ? e.message : 'Tente novamente.');
     }
-    if (router.canGoBack()) router.back();
-    else router.replace('/locatarios');
   }
 
   return (
@@ -241,6 +248,7 @@ export function LocatarioFormScreen({ id }: Props) {
       <AppButton
         label={id ? 'Salvar alterações' : 'Adicionar locatário'}
         onPress={salvar}
+        loading={salvando}
         style={styles.botao}
       />
     </ScreenContainer>

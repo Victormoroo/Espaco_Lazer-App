@@ -6,19 +6,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
 /**
- * Client do Supabase — preparado para uso futuro (Auth, PostgreSQL, Storage,
- * Edge Functions). Nesta primeira etapa ele NÃO é usado por nenhuma tela:
- * o login ainda é validado localmente (ver src/features/auth/services).
- *
- * 👉 Preencha os dois valores abaixo com os dados do seu projeto:
- *    Painel do Supabase → Project Settings → API
- *      - Project URL  → supabaseUrl
- *      - anon public  → supabaseAnonKey
+ * Client do Supabase. URL e chave (publishable/anon) vêm do `.env.local`
+ * (variáveis EXPO_PUBLIC_*, embutidas no bundle). A chave publishable é pública
+ * por design — o que protege os dados é o RLS configurado na tabela.
  */
-const supabaseUrl = 'COLE_AQUI_A_URL_DO_SUPABASE';
-const supabaseAnonKey = 'COLE_AQUI_A_ANON_KEY_DO_SUPABASE';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error(
+    'Supabase não configurado: defina EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_KEY no .env.local e reinicie com `npx expo start -c`.',
+  );
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     storage: AsyncStorage,
     autoRefreshToken: true,

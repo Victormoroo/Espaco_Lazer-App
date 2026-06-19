@@ -62,10 +62,14 @@ export function LocatarioDetailScreen({ id }: Props) {
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: () => {
-            remover(loc.id);
-            if (router.canGoBack()) router.back();
-            else router.replace('/locatarios');
+          onPress: async () => {
+            try {
+              await remover(loc.id);
+              if (router.canGoBack()) router.back();
+              else router.replace('/locatarios');
+            } catch (e) {
+              Alert.alert('Erro ao excluir', e instanceof Error ? e.message : 'Tente novamente.');
+            }
           },
         },
       ],

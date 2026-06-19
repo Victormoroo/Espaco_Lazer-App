@@ -1,25 +1,37 @@
-import React, { createContext, useContext, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Locatario, LocatarioInput } from '../types';
+import { onlyDigits } from '../../../shared/utils/cpf';
 import {
   adicionarLocatario,
   atualizarLocatario,
   removerLocatario,
 } from '../state/locatariosReducer';
-import { onlyDigits } from '../../../shared/utils/cpf';
+import {
+  listarLocatarios,
+  inserirLocatario,
+  atualizarLocatarioDb,
+  removerLocatarioDb,
+} from '../services/locatariosService';
 
 type LocatariosContextValue = {
   locatarios: Locatario[];
-  adicionar: (input: LocatarioInput) => Locatario;
-  atualizar: (id: string, input: LocatarioInput) => void;
-  remover: (id: string) => void;
+  carregando: boolean;
+  erro: string | null;
+  recarregar: () => Promise<void>;
+  adicionar: (input: LocatarioInput) => Promise<void>;
+  atualizar: (id: string, input: LocatarioInput) => Promise<void>;
+  remover: (id: string) => Promise<void>;
   obter: (id: string) => Locatario | undefined;
 };
 
 const LocatariosContext = createContext<LocatariosContextValue | null>(null);
-
-function gerarId(): string {
-  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-}
 
 function normalizar(input: LocatarioInput): LocatarioInput {
   return {
@@ -38,27 +50,57 @@ function normalizar(input: LocatarioInput): LocatarioInput {
   };
 }
 
+function ordenar(lista: Locatario[]): Locatario[] {
+  return [...lista].sort((a, b) => a.nome.localeCompare(b.nome));
+}
+
+/**
+ * Estado dos locatários, persistido no Supabase. Mantém um cache local em
+ * memória sincronizado: carrega ao montar e atualiza após cada operação.
+ */
 export function LocatariosProvider({ children }: { children: React.ReactNode }) {
   const [locatarios, setLocatarios] = useState<Locatario[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
+
+  const recarregar = useCallback(async () => {
+    setCarregando(true);
+    setErro(null);
+    try {
+      setLocatarios(ordenar(await listarLocatarios()));
+    } catch (e) {
+      setErro(e instanceof Error ? e.message : 'Falha ao carregar locatários.');
+    } finally {
+      setCarregando(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void recarregar();
+  }, [recarregar]);
 
   const value = useMemo<LocatariosContextValue>(
     () => ({
       locatarios,
-      adicionar: (input) => {
-        const novo: Locatario = {
-          ...normalizar(input),
-          id: gerarId(),
-          criadoEm: new Date().toISOString(),
-        };
-        setLocatarios((lista) => adicionarLocatario(lista, novo));
-        return novo;
+      carregando,
+      erro,
+      recarregar,
+      adicionar: async (input) => {
+        const novo = await inserirLocatario(normalizar(input));
+        setLocatarios((lista) => ordenar(adicionarLocatario(lista, novo)));
       },
-      atualizar: (id, input) =>
-        setLocatarios((lista) => atualizarLocatario(lista, id, normalizar(input))),
-      remover: (id) => setLocatarios((lista) => removerLocatario(lista, id)),
+      atualizar: async (id, input) => {
+        const norm = normalizar(input);
+        await atualizarLocatarioDb(id, norm);
+        setLocatarios((lista) => ordenar(atualizarLocatario(lista, id, norm)));
+      },
+      remover: async (id) => {
+        await removerLocatarioDb(id);
+        setLocatarios((lista) => removerLocatario(lista, id));
+      },
       obter: (id) => locatarios.find((l) => l.id === id),
     }),
-    [locatarios],
+    [locatarios, carregando, erro, recarregar],
   );
 
   return <LocatariosContext.Provider value={value}>{children}</LocatariosContext.Provider>;
