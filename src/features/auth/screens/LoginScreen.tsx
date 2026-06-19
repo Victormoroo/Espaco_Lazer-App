@@ -8,31 +8,34 @@ import { AppButton } from '../../../shared/components/AppButton';
 import { AppColors } from '../../../shared/constants/colors';
 import { AppStrings } from '../../../shared/constants/strings';
 import { formatCpf } from '../../../shared/utils/cpf';
-import { validateLogin } from '../services/authService';
+import { useAuth } from '../context/AuthContext';
 
 export function LoginScreen() {
   const router = useRouter();
+  const { entrar } = useAuth();
   const [cpf, setCpf] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  function handleLogin() {
+  async function handleLogin() {
     Keyboard.dismiss();
     setError(null);
-    setLoading(true);
 
-    const result = validateLogin(cpf, password);
-
-    if (!result.success) {
-      setError(result.message);
-      setLoading(false);
+    if (!cpf.trim() || !password.trim()) {
+      setError('Informe o CPF e a senha.');
       return;
     }
 
-    setLoading(false);
-    // `replace` evita que o botão "voltar" retorne ao login depois de logar.
-    router.replace('/inicio');
+    setLoading(true);
+    try {
+      await entrar(cpf, password);
+      // `replace` evita que o botão "voltar" retorne ao login depois de logar.
+      router.replace('/inicio');
+    } catch (e) {
+      setLoading(false);
+      setError(e instanceof Error ? e.message : 'Não foi possível entrar.');
+    }
   }
 
   return (

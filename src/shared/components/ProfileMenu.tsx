@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { AppColors } from '../constants/colors';
+import { useAuth } from '../../features/auth/context/AuthContext';
 
 /** Âncora = centro horizontal e base (y) do ícone de perfil, em coords da tela. */
 type Ancora = { x: number; y: number };
@@ -34,13 +35,15 @@ export function useProfileMenu(): ProfileMenuContextValue {
 export function ProfileMenuProvider({ children }: { children: React.ReactNode }) {
   const [ancora, setAncora] = useState<Ancora | null>(null);
   const router = useRouter();
+  const { sair: sairAuth } = useAuth();
 
   function fechar() {
     setAncora(null);
   }
 
-  function sair() {
+  async function sair() {
     setAncora(null);
+    await sairAuth();
     router.replace('/login');
   }
 

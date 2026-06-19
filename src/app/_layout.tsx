@@ -5,19 +5,18 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppColors } from '../shared/constants/colors';
-import { LocatariosProvider } from '../features/locatarios/context/LocatariosContext';
+import { AuthProvider } from '../features/auth/context/AuthContext';
 
 /**
- * Layout raiz da navegação (Expo Router).
- * Stack sem header — splash/login não têm navbar; a área autenticada (grupo
- * (app)) usa um Drawer com sua própria navbar.
+ * Layout raiz. Provê a sessão (AuthProvider) e a Stack de navegação. Splash,
+ * login e a área autenticada (grupo (app)) decidem o que mostrar pela sessão.
  */
 export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <StatusBar style="dark" />
-        <LocatariosProvider>
+        <AuthProvider>
           <Stack
             screenOptions={{
               headerShown: false,
@@ -25,7 +24,7 @@ export default function RootLayout() {
               contentStyle: { backgroundColor: AppColors.lightGray },
             }}
           />
-        </LocatariosProvider>
+        </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
